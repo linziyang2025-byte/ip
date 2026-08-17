@@ -17,24 +17,12 @@ public class Geek {
         System.out.println("----------------------\n");
 
         Scanner scanner = new Scanner(System.in);
-        List<String> tasks = new ArrayList<>();
-        while(true){
+        TaskList tasks = new TaskList();
+
+        boolean isRunning = true;
+        while(isRunning){
             String input = scanner.nextLine();
-            if(input.equals("bye")){
-                System.out.println("----------------------");
-                System.out.println("Bye. Hope to see you again soon!");
-                System.out.println("----------------------");
-                break;
-            } else if (input.equals("list")){
-                System.out.println("----------------------");
-                printl(tasks);
-                System.out.println("----------------------\n");
-            } else {
-                tasks.add(input);
-                System.out.println("----------------------");
-                System.out.printf("added: %s\n", input);
-                System.out.println("----------------------\n");
-            }
+            isRunning = tasks.receiving(input);
         }
         scanner.close();
     }
