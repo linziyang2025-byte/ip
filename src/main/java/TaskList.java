@@ -25,7 +25,11 @@ public class TaskList {
                 int taskNumber = parseTaskNumber(input, "unmark");
                 checkTaskNumber(taskNumber);
                 tasks.get(taskNumber - 1).unmark();
-            } else if (input.startsWith("todo ") || input.equals("todo")
+            } else if (input.equals("delete") || input.startsWith("delete ")) {
+                int taskNumber = parseTaskNumber(input, "delete");
+                checkTaskNumber(taskNumber);
+                deleteTask(taskNumber);
+            }else if (input.startsWith("todo ") || input.equals("todo")
                     || input.startsWith("deadline ") || input.equals("deadline")
                     || input.startsWith("event ") || input.equals("event")) {
                 addTask(input);
@@ -43,6 +47,16 @@ public class TaskList {
 
     private int getLen(){
         return tasks.size();
+    }
+
+    private void deleteTask(int taskNumber) {
+        Task deletedTask = tasks.remove(taskNumber - 1);
+
+        System.out.println("----------------------");
+        System.out.println("Noted. I've removed this task:");
+        System.out.println("  " + deletedTask);
+        System.out.println("Now you have " + tasks.size() + " tasks in the list.");
+        System.out.println("----------------------\n");
     }
 
     private int parseTaskNumber(String input, String command) {
