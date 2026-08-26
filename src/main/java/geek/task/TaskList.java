@@ -1,6 +1,10 @@
+package geek.task;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import geek.exception.GeekException;
 
 public class TaskList {
     private final List<Task> tasks;

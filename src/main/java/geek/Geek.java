@@ -1,6 +1,15 @@
+package geek;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.format.DateTimeParseException;
+
+import geek.exception.GeekException;
+import geek.parser.Parser;
+import geek.storage.Storage;
+import geek.task.Task;
+import geek.task.TaskList;
+import geek.ui.Ui;
 
 public class Geek {
     private final Storage storage;

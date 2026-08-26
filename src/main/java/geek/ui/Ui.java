@@ -1,3 +1,5 @@
+package geek.ui;
+
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.time.LocalDate;
@@ -5,6 +7,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
+
+import geek.task.Task;
 
 public class Ui {
     private static final String LINE = "----------------------";
@@ -39,7 +43,7 @@ public class Ui {
 
     public void showWelcome() {
         output.println(LINE);
-        output.println("Hello! I'm Geek.");
+        output.println("Hello! I'm geek.Geek.");
         output.println("What can I do for you?");
         output.println(LINE + "\n");
     }
