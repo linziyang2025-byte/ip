@@ -11,7 +11,6 @@ import java.util.Locale;
 import geek.exception.GeekException;
 import geek.time.DateTimeParser;
 
-
 public abstract class Task {
     private static final DateTimeFormatter DISPLAY_DATE_FORMAT =
             DateTimeFormatter.ofPattern(
@@ -24,6 +23,7 @@ public abstract class Task {
                     "MMM d yyyy, h:mm a",
                     Locale.ENGLISH
             );
+
     private final String description;
     private boolean isDone;
 
