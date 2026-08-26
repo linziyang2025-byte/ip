@@ -19,11 +19,11 @@ import geek.exception.GeekException;
 class TaskListTest {
     @Test
     void constructor_sourceListChanges_doNotChangeTaskList() {
-        List<Task> source = new ArrayList<>();
-        source.add(Task.newTodo("first"));
-        TaskList taskList = new TaskList(source);
+        List<Task> sourceTasks = new ArrayList<>();
+        sourceTasks.add(Task.newTodo("first"));
+        TaskList taskList = new TaskList(sourceTasks);
 
-        source.add(Task.newTodo("second"));
+        sourceTasks.add(Task.newTodo("second"));
 
         assertEquals(1, taskList.size());
     }
@@ -114,10 +114,10 @@ class TaskListTest {
                 List.of(todo, event, deadline)
         );
 
-        List<Task> result = taskList.findOn(
+        List<Task> matchingTasks = taskList.findOn(
                 LocalDate.of(2019, 12, 3)
         );
 
-        assertEquals(List.of(event, deadline), result);
+        assertEquals(List.of(event, deadline), matchingTasks);
     }
 }

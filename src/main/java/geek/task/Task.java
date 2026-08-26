@@ -11,7 +11,6 @@ import java.util.Locale;
 import geek.exception.GeekException;
 import geek.time.DateTimeParser;
 
-
 /**
  * Represents a task with a description and mutable completion status.
  *
@@ -29,6 +28,7 @@ public abstract class Task {
                     "MMM d yyyy, h:mm a",
                     Locale.ENGLISH
             );
+
     private final String description;
     private boolean isDone;
 

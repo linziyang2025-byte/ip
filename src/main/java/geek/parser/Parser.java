@@ -142,7 +142,9 @@ public final class Parser {
     }
 
     private static Task parseTodo(String input) {
-        String description = input.substring(4).trim();
+        String description = input
+                .substring("todo".length())
+                .trim();
 
         if (description.isEmpty()) {
             throw new GeekException(
@@ -174,10 +176,10 @@ public final class Parser {
         }
 
         String description = input
-                .substring(8, byIndex)
+                .substring("deadline".length(), byIndex)
                 .trim();
         String deadline = input
-                .substring(byIndex + 3)
+                .substring(byIndex + "/by".length())
                 .trim();
 
         if (description.isEmpty()) {
@@ -222,13 +224,13 @@ public final class Parser {
         }
 
         String description = input
-                .substring(5, fromIndex)
+                .substring("event".length(), fromIndex)
                 .trim();
-        String from = input
-                .substring(fromIndex + 5, toIndex)
+        String startTime = input
+                .substring(fromIndex + "/from".length(), toIndex)
                 .trim();
-        String to = input
-                .substring(toIndex + 3)
+        String endTime = input
+                .substring(toIndex + "/to".length())
                 .trim();
 
         if (description.isEmpty()) {
@@ -238,13 +240,13 @@ public final class Parser {
             );
         }
 
-        if (from.isEmpty() || to.isEmpty()) {
+        if (startTime.isEmpty() || endTime.isEmpty()) {
             throw new GeekException(
                     "Both the start and end times are required."
             );
         }
 
-        return Task.newEvent(description, from, to);
+        return Task.newEvent(description, startTime, endTime);
     }
 
     /**
