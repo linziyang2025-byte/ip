@@ -10,7 +10,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Parses supported user-facing and stored date-time representations.
+ *
+ * User input is parsed strictly but case-insensitively after surrounding and
+ * repeated whitespace is normalized.
+ */
 public final class DateTimeParser {
+    /**
+     * Supported patterns for user-entered date components.
+     */
     private static final List<String> DATE_PATTERNS = List.of(
             "uuuu-MM-dd",
             "d/M/uuuu",
@@ -20,6 +29,9 @@ public final class DateTimeParser {
             "MMM d, uuuu"
     );
 
+    /**
+     * Supported patterns for user-entered time components.
+     */
     private static final List<String> TIME_PATTERNS = List.of(
             "HHmm",
             "HH:mm",
@@ -38,6 +50,16 @@ public final class DateTimeParser {
     private DateTimeParser() {
     }
 
+    /**
+     * Parses a deadline containing either a date or a date-time.
+     *
+     * A date-only deadline is represented at the start of that day with
+     * {@code hasTime} set to {@code false}.
+     *
+     * @param input User-entered deadline.
+     * @return Parsed deadline and whether a time was supplied.
+     * @throws DateTimeParseException If no supported format matches.
+     */
     public static ParsedDateTime parseDeadline(String input) {
         String normalizedInput = normalize(input);
 
@@ -72,6 +94,13 @@ public final class DateTimeParser {
         throw invalidDateTime(input);
     }
 
+    /**
+     * Parses a user-entered date-time.
+     *
+     * @param input User-entered date-time.
+     * @return Parsed date-time.
+     * @throws DateTimeParseException If no supported date-time format matches.
+     */
     public static LocalDateTime parseDateTime(String input) {
         String normalizedInput = normalize(input);
 
@@ -89,6 +118,13 @@ public final class DateTimeParser {
         throw invalidDateTime(input);
     }
 
+    /**
+     * Parses a user-entered date without a time.
+     *
+     * @param input User-entered date.
+     * @return Parsed date.
+     * @throws DateTimeParseException If no supported date format matches.
+     */
     public static LocalDate parseDate(String input) {
         String normalizedInput = normalize(input);
 
@@ -106,6 +142,14 @@ public final class DateTimeParser {
         throw invalidDateTime(input);
     }
 
+    /**
+     * Parses a stored ISO date or ISO date-time while preserving its time flag.
+     *
+     * @param storedValue Stored deadline value.
+     * @return Parsed deadline and whether the stored value includes a time.
+     * @throws DateTimeParseException If the value is neither a valid ISO date
+     *         nor a valid ISO date-time.
+     */
     public static ParsedDateTime parseStoredDeadline(
             String storedValue
     ) {
@@ -127,6 +171,12 @@ public final class DateTimeParser {
         }
     }
 
+    /**
+     * Creates strict, case-insensitive formatters for every supported date
+     * pattern.
+     *
+     * @return Unmodifiable list of date formatters.
+     */
     private static List<DateTimeFormatter> createDateFormatters() {
         List<DateTimeFormatter> formatters = new ArrayList<>();
 
@@ -137,6 +187,12 @@ public final class DateTimeParser {
         return List.copyOf(formatters);
     }
 
+    /**
+     * Creates formatters for every supported date-and-time pattern
+     * combination.
+     *
+     * @return Unmodifiable list of date-time formatters.
+     */
     private static List<DateTimeFormatter> createDateTimeFormatters() {
         List<DateTimeFormatter> formatters = new ArrayList<>();
 
@@ -153,6 +209,12 @@ public final class DateTimeParser {
         return List.copyOf(formatters);
     }
 
+    /**
+     * Creates a strict, case-insensitive English formatter.
+     *
+     * @param pattern Date or date-time pattern.
+     * @return Formatter for the pattern.
+     */
     private static DateTimeFormatter createFormatter(
             String pattern
     ) {
@@ -163,10 +225,22 @@ public final class DateTimeParser {
                 .withResolverStyle(ResolverStyle.STRICT);
     }
 
+    /**
+     * Trims an input and collapses repeated whitespace to one space.
+     *
+     * @param input Text to normalize.
+     * @return Normalized text.
+     */
     private static String normalize(String input) {
         return input.trim().replaceAll("\\s+", " ");
     }
 
+    /**
+     * Creates the common exception used when no supported format matches.
+     *
+     * @param input Input that could not be parsed.
+     * @return Date-time parsing exception for the input.
+     */
     private static DateTimeParseException invalidDateTime(
             String input
     ) {
@@ -177,6 +251,12 @@ public final class DateTimeParser {
         );
     }
 
+    /**
+     * Represents a parsed deadline and whether its source included a time.
+     *
+     * @param value Parsed value; date-only inputs use the start of the day.
+     * @param hasTime Whether the source included a time component.
+     */
     public record ParsedDateTime(
             LocalDateTime value,
             boolean hasTime

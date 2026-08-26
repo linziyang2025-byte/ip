@@ -7,10 +7,22 @@ import geek.exception.GeekException;
 import geek.task.Task;
 import geek.time.DateTimeParser;
 
+/**
+ * Converts raw user input into structured commands for Geek.
+ */
 public final class Parser {
     private Parser() {
     }
 
+    /**
+     * Parses one line of user input.
+     *
+     * @param input Raw command entered by the user.
+     * @return Structured command containing the data required for execution.
+     * @throws GeekException If the command syntax or task data is invalid.
+     * @throws DateTimeParseException If a deadline or event contains an
+     *         unsupported date or time.
+     */
     public static Command parse(String input) {
         if (input == null || input.isBlank()) {
             throw new GeekException("Please enter a command.");
@@ -53,6 +65,14 @@ public final class Parser {
         }
     }
 
+    /**
+     * Extracts the task number following a command keyword.
+     *
+     * @param input Complete user command.
+     * @param command Command keyword preceding the number.
+     * @return Number entered by the user.
+     * @throws GeekException If the number is missing or is not an integer.
+     */
     private static int parseTaskNumber(
             String input,
             String command
@@ -77,6 +97,13 @@ public final class Parser {
         }
     }
 
+    /**
+     * Extracts and parses the date in an {@code on} command.
+     *
+     * @param input Complete {@code on} command.
+     * @return Date to search for.
+     * @throws GeekException If the date is missing or unsupported.
+     */
     private static LocalDate parseQueryDate(String input) {
         String dateText = input
                 .substring("on".length())
@@ -126,6 +153,15 @@ public final class Parser {
         return Task.newTodo(description);
     }
 
+    /**
+     * Parses a deadline command and validates its description and delimiter.
+     *
+     * @param input Complete deadline command.
+     * @return Incomplete deadline task described by the command.
+     * @throws GeekException If the description, delimiter, or deadline is
+     *         missing.
+     * @throws DateTimeParseException If the deadline has an invalid format.
+     */
     private static Task parseDeadline(String input) {
         int byIndex = input.indexOf("/by");
 
@@ -160,6 +196,16 @@ public final class Parser {
         return Task.newDeadline(description, deadline);
     }
 
+    /**
+     * Parses an event command and validates its description and time range.
+     *
+     * @param input Complete event command.
+     * @return Incomplete event task described by the command.
+     * @throws GeekException If required fields are missing or the event does
+     *         not end after it starts.
+     * @throws DateTimeParseException If either event time has an invalid
+     *         format.
+     */
     private static Task parseEvent(String input) {
         int fromIndex = input.indexOf("/from");
         int toIndex = input.indexOf("/to");
@@ -201,16 +247,37 @@ public final class Parser {
         return Task.newEvent(description, from, to);
     }
 
+    /**
+     * Identifies the operation represented by a parsed command.
+     */
     public enum CommandType {
+        /** Ends the application. */
         BYE,
+        /** Shows every task. */
         LIST,
+        /** Shows dated tasks occurring on a specified date. */
         ON,
+        /** Marks a task as completed. */
         MARK,
+        /** Marks a task as not completed. */
         UNMARK,
+        /** Removes a task. */
         DELETE,
+        /** Adds a task. */
         ADD
     }
 
+    /**
+     * Contains the type-specific data required to execute a parsed command.
+     *
+     * Components not used by a command type contain {@code null} or {@code 0}.
+     * Task numbers are one-based.
+     *
+     * @param type Operation to perform.
+     * @param task Task carried by an add command, or {@code null}.
+     * @param taskNumber Task number carried by a task operation, or {@code 0}.
+     * @param date Date carried by an on command, or {@code null}.
+     */
     public record Command(
             CommandType type,
             Task task,

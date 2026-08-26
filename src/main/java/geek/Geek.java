@@ -11,17 +11,31 @@ import geek.task.Task;
 import geek.task.TaskList;
 import geek.ui.Ui;
 
+/**
+ * Coordinates command parsing, task management, persistence, and console output.
+ */
 public class Geek {
     private final Storage storage;
     private final Ui ui;
     private TaskList tasks;
 
+    /**
+     * Creates a Geek application that stores tasks at the specified path.
+     *
+     * @param filePath Path to the task data file, either relative or absolute.
+     */
     public Geek(String filePath) {
         this.storage = new Storage(Path.of(filePath));
         this.ui = new Ui();
         this.tasks = new TaskList();
     }
 
+    /**
+     * Runs the command loop until the user enters {@code bye}.
+     *
+     * Invalid input and persistence failures are reported through the UI so that
+     * the application can continue when possible.
+     */
     public void run() {
         ui.showWelcome();
         loadTasks();
@@ -53,6 +67,13 @@ public class Geek {
         ui.close();
     }
 
+    /**
+     * Executes a parsed command and reports its result to the user.
+     *
+     * @param command Command to execute.
+     * @return {@code true} if the command loop should continue, or {@code false}
+     *         after a bye command.
+     */
     private boolean execute(Parser.Command command) {
         return switch (command.type()) {
             case BYE -> {
@@ -98,6 +119,11 @@ public class Geek {
         };
     }
 
+    /**
+     * Loads saved tasks and reports unreadable or corrupted data.
+     *
+     * A file-level I/O failure resets the in-memory task list to an empty list.
+     */
     private void loadTasks() {
         try {
             Storage.LoadResult result = storage.loadTasks();
@@ -112,6 +138,10 @@ public class Geek {
         }
     }
 
+    /**
+     * Saves the current task list and reports an I/O failure without ending the
+     * command loop.
+     */
     private void saveTasks() {
         try {
             storage.saveTasks(tasks.getTasks());
@@ -120,6 +150,11 @@ public class Geek {
         }
     }
 
+    /**
+     * Starts Geek using {@code data/geek.txt} as its task data file.
+     *
+     * @param args Command-line arguments; they are not used.
+     */
     public static void main(String[] args) {
         new Geek("data/geek.txt").run();
     }
