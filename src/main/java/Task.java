@@ -1,7 +1,23 @@
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Base64;
+import java.util.Locale;
 
 public abstract class Task {
+    private static final DateTimeFormatter DISPLAY_DATE_FORMAT =
+            DateTimeFormatter.ofPattern(
+                    "MMM d yyyy",
+                    Locale.ENGLISH
+            );
+
+    private static final DateTimeFormatter DISPLAY_DATE_TIME_FORMAT =
+            DateTimeFormatter.ofPattern(
+                    "MMM d yyyy, h:mm a",
+                    Locale.ENGLISH
+            );
     private final String description;
     private boolean isDone;
 
@@ -14,20 +30,47 @@ public abstract class Task {
         this.isDone = isDone;
     }
 
-    public static Task newTodoT(String description) {
+    public static Task newTodo(String description) {
         return new Todo(description);
     }
 
-    public static Task newDdlT(String description, String deadline) {
-        return new Deadline(description, deadline);
+    public static Task newDeadline(
+            String description,
+            String deadline
+    ) {
+        DateTimeParser.ParsedDateTime parsedDeadline =
+                DateTimeParser.parseDeadline(deadline);
+
+        return new Deadline(
+                description,
+                parsedDeadline.value(),
+                parsedDeadline.hasTime()
+        );
     }
 
-    public static Task newEventT(
+    public static Task newEvent(
             String description,
             String startTime,
             String endTime
     ) {
-        return new Event(description, startTime, endTime);
+        LocalDateTime parsedStartTime =
+                DateTimeParser.parseDateTime(startTime);
+
+        LocalDateTime parsedEndTime =
+                DateTimeParser.parseDateTime(endTime);
+
+        if (!parsedEndTime.isAfter(parsedStartTime)) {
+            throw new GeekException(
+                    "The event end time must be "
+                            + "after the start time."
+            );
+        }
+
+        return new Event(
+                description,
+                parsedStartTime,
+                parsedEndTime
+        );
     }
 
     public static Task fromDataString(String data) {
@@ -67,25 +110,65 @@ public abstract class Task {
             case "D" -> {
                 requireFieldCount(fields, 4);
 
-                String deadline = decode(fields[3]);
+                String deadlineText = decode(fields[3]);
 
-                if (deadline.isBlank()) {
+                if (deadlineText.isBlank()) {
                     throw new IllegalArgumentException(
                             "Saved deadline has no date."
                     );
                 }
 
-                yield new Deadline(description, deadline, isDone);
+                DateTimeParser.ParsedDateTime deadline;
+
+                try {
+                    deadline = DateTimeParser.parseStoredDeadline(
+                            deadlineText
+                    );
+                } catch (DateTimeParseException e) {
+                    throw new IllegalArgumentException(
+                            "Saved deadline has an invalid date.",
+                            e
+                    );
+                }
+
+                yield new Deadline(
+                        description,
+                        deadline.value(),
+                        deadline.hasTime(),
+                        isDone
+                );
             }
             case "E" -> {
                 requireFieldCount(fields, 5);
 
-                String startTime = decode(fields[3]);
-                String endTime = decode(fields[4]);
+                String startTimeText = decode(fields[3]);
+                String endTimeText = decode(fields[4]);
 
-                if (startTime.isBlank() || endTime.isBlank()) {
+                if (startTimeText.isBlank()
+                        || endTimeText.isBlank()) {
                     throw new IllegalArgumentException(
                             "Saved event has an invalid time."
+                    );
+                }
+
+                LocalDateTime startTime;
+                LocalDateTime endTime;
+
+                try {
+                    startTime =
+                            LocalDateTime.parse(startTimeText);
+                    endTime =
+                            LocalDateTime.parse(endTimeText);
+                } catch (DateTimeParseException e) {
+                    throw new IllegalArgumentException(
+                            "Saved event has an invalid time.",
+                            e
+                    );
+                }
+
+                if (!endTime.isAfter(startTime)) {
+                    throw new IllegalArgumentException(
+                            "Saved event ends before it starts."
                     );
                 }
 
@@ -154,6 +237,10 @@ public abstract class Task {
         return isDone ? "X" : " ";
     }
 
+    public boolean occursOn(LocalDate date) {
+        return false;
+    }
+
     private static String encode(String value) {
         return Base64.getUrlEncoder()
                 .withoutPadding()
@@ -214,20 +301,28 @@ public abstract class Task {
     }
 
     private static class Deadline extends Task {
-        private final String deadline;
+        private final LocalDateTime deadline;
+        private final boolean hasTime;
 
-        private Deadline(String description, String deadline) {
+        private Deadline(
+                String description,
+                LocalDateTime deadline,
+                boolean hasTime
+        ) {
             super(description);
             this.deadline = deadline;
+            this.hasTime = hasTime;
         }
 
         private Deadline(
                 String description,
-                String deadline,
+                LocalDateTime deadline,
+                boolean hasTime,
                 boolean isDone
         ) {
             super(description, isDone);
             this.deadline = deadline;
+            this.hasTime = hasTime;
         }
 
         @Override
@@ -236,29 +331,46 @@ public abstract class Task {
         }
 
         @Override
-        protected void appendAdditionalData(StringBuilder data) {
-            appendEncodedField(data, deadline);
+        protected void appendAdditionalData(
+                StringBuilder data
+        ) {
+            appendEncodedField(
+                    data,
+                    hasTime
+                            ? deadline.toString()
+                            : deadline.toLocalDate().toString()
+            );
+        }
+
+        @Override
+        public boolean occursOn(LocalDate date) {
+            return deadline.toLocalDate().equals(date);
         }
 
         @Override
         public String toString() {
+            String formattedDeadline = hasTime
+                    ? deadline.format(DISPLAY_DATE_TIME_FORMAT)
+                    : deadline.toLocalDate()
+                            .format(DISPLAY_DATE_FORMAT);
+
             return String.format(
                     "[D][%s] %s (by: %s)",
                     getStatus(),
                     getDescription(),
-                    deadline
+                    formattedDeadline
             );
         }
     }
 
     private static class Event extends Task {
-        private final String startTime;
-        private final String endTime;
+        private final LocalDateTime startTime;
+        private final LocalDateTime endTime;
 
         private Event(
                 String description,
-                String startTime,
-                String endTime
+                LocalDateTime startTime,
+                LocalDateTime endTime
         ) {
             super(description);
             this.startTime = startTime;
@@ -267,8 +379,8 @@ public abstract class Task {
 
         private Event(
                 String description,
-                String startTime,
-                String endTime,
+                LocalDateTime startTime,
+                LocalDateTime endTime,
                 boolean isDone
         ) {
             super(description, isDone);
@@ -282,9 +394,26 @@ public abstract class Task {
         }
 
         @Override
-        protected void appendAdditionalData(StringBuilder data) {
-            appendEncodedField(data, startTime);
-            appendEncodedField(data, endTime);
+        protected void appendAdditionalData(
+                StringBuilder data
+        ) {
+            appendEncodedField(
+                    data,
+                    startTime.toString()
+            );
+            appendEncodedField(
+                    data,
+                    endTime.toString()
+            );
+        }
+
+        @Override
+        public boolean occursOn(LocalDate date) {
+            LocalDate startDate = startTime.toLocalDate();
+            LocalDate endDate = endTime.toLocalDate();
+
+            return !date.isBefore(startDate)
+                    && !date.isAfter(endDate);
         }
 
         @Override
@@ -293,8 +422,12 @@ public abstract class Task {
                     "[E][%s] %s (from: %s to: %s)",
                     getStatus(),
                     getDescription(),
-                    startTime,
-                    endTime
+                    startTime.format(
+                            DISPLAY_DATE_TIME_FORMAT
+                    ),
+                    endTime.format(
+                            DISPLAY_DATE_TIME_FORMAT
+                    )
             );
         }
     }

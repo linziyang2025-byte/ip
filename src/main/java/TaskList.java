@@ -1,9 +1,19 @@
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class TaskList {
+    private static final DateTimeFormatter DISPLAY_DATE_FORMAT =
+            DateTimeFormatter.ofPattern(
+                    "MMM d yyyy",
+                    Locale.ENGLISH
+            );
+
     private final Storage storage =
             new Storage(Path.of("data", "geek.txt"));
 
@@ -27,6 +37,10 @@ public class TaskList {
                 return false;
             } else if (input.equals("list")) {
                 printTasks();
+            } else if (input.equals("on")
+                    || input.startsWith("on ")) {
+                LocalDate date = parseQueryDate(input);
+                printTasksOnDate(date);
             } else if (input.equals("mark")
                     || input.startsWith("mark ")) {
                 int taskNumber = parseTaskNumber(input, "mark");
@@ -58,8 +72,17 @@ public class TaskList {
             }
         } catch (GeekException e) {
             printError(e.getMessage());
+        } catch (DateTimeParseException e) {
+            printError(
+                    "Use a supported date or time format, "
+                            + "such as 2019-12-02, "
+                            + "2/12/2019 1800, or "
+                            + "Dec 2 2019 6:00 PM."
+            );
         } catch (NumberFormatException e) {
-            printError("Please enter a valid task number.");
+            printError(
+                    "Please enter a valid task number."
+            );
         }
 
         return true;
@@ -150,7 +173,7 @@ public class TaskList {
                 );
             }
 
-            task = Task.newTodoT(description);
+            task = Task.newTodo(description);
 
         } else if (input.equals("deadline")
                 || input.startsWith("deadline ")) {
@@ -160,7 +183,7 @@ public class TaskList {
                 throw new GeekException(
                         "Deadline format: "
                                 + "deadline <description> "
-                                + "/by <time>"
+                                + "/by <date or date-time>"
                 );
             }
 
@@ -178,11 +201,11 @@ public class TaskList {
 
             if (deadline.isEmpty()) {
                 throw new GeekException(
-                        "The deadline time cannot be empty."
+                        "The deadline date cannot be empty."
                 );
             }
 
-            task = Task.newDdlT(
+            task = Task.newDeadline(
                     description,
                     deadline
             );
@@ -198,7 +221,8 @@ public class TaskList {
                 throw new GeekException(
                         "Event format: "
                                 + "event <description> "
-                                + "/from <start> /to <end>"
+                                + "/from <date-time> "
+                                + "/to <date-time>"
                 );
             }
 
@@ -226,7 +250,7 @@ public class TaskList {
                 );
             }
 
-            task = Task.newEventT(
+            task = Task.newEvent(
                     description,
                     from,
                     to
@@ -250,6 +274,58 @@ public class TaskList {
                 "Now you have %s tasks in the list.%n",
                 getLen()
         );
+        System.out.println("----------------------\n");
+    }
+
+    private LocalDate parseQueryDate(String input) {
+        String dateText = input
+                .substring("on".length())
+                .trim();
+
+        if (dateText.isEmpty()) {
+            throw new GeekException(
+                    "Please provide a date after on."
+            );
+        }
+
+        try {
+            return DateTimeParser.parseDate(dateText);
+        } catch (DateTimeParseException e) {
+            throw new GeekException(
+                    "Use a supported query date, such as "
+                            + "2019-12-02, 2/12/2019, "
+                            + "or Dec 2 2019."
+            );
+        }
+    }
+
+    private void printTasksOnDate(LocalDate date) {
+        List<Task> matchingTasks = new ArrayList<>();
+
+        for (Task task : tasks) {
+            if (task.occursOn(date)) {
+                matchingTasks.add(task);
+            }
+        }
+
+        System.out.println("----------------------");
+        System.out.println(
+                "Here are the tasks on "
+                        + date.format(DISPLAY_DATE_FORMAT)
+                        + ":"
+        );
+
+        if (matchingTasks.isEmpty()) {
+            System.out.println("No tasks found.");
+        } else {
+            for (int i = 0; i < matchingTasks.size(); i++) {
+                System.out.println(
+                        (i + 1) + ". "
+                                + matchingTasks.get(i)
+                );
+            }
+        }
+
         System.out.println("----------------------\n");
     }
 
