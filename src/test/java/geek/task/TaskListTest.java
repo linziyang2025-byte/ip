@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import geek.exception.GeekException;
 
 /**
- * Tests one-based task operations and date filtering in a task list.
+ * Tests one-based task operations and task filtering in a task list.
  */
 class TaskListTest {
     @Test
@@ -119,5 +119,31 @@ class TaskListTest {
         );
 
         assertEquals(List.of(event, deadline), matchingTasks);
+    }
+
+    @Test
+    void find_mixedCaseKeyword_returnsDescriptionMatchesInOrder() {
+        Task first = Task.newTodo("read BOOK");
+        Task second = Task.newTodo("write notes");
+        Task third = Task.newDeadline(
+                "return book",
+                "3/12/2019"
+        );
+        TaskList taskList = new TaskList(
+                List.of(first, second, third)
+        );
+
+        List<Task> matchingTasks = taskList.find("BoOk");
+
+        assertEquals(List.of(first, third), matchingTasks);
+    }
+
+    @Test
+    void find_absentKeyword_returnsEmptyList() {
+        TaskList taskList = new TaskList(
+                List.of(Task.newTodo("read book"))
+        );
+
+        assertEquals(List.of(), taskList.find("notes"));
     }
 }

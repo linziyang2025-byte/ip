@@ -3,6 +3,7 @@ package geek.task;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import geek.exception.GeekException;
 
@@ -88,6 +89,23 @@ public class TaskList {
     public List<Task> findOn(LocalDate date) {
         return tasks.stream()
                 .filter(task -> task.occursOn(date))
+                .toList();
+    }
+
+    /**
+     * Finds tasks whose descriptions contain the specified keyword,
+     * ignoring letter case.
+     *
+     * @param keyword Keyword to search for.
+     * @return Unmodifiable result list preserving task-list order.
+     */
+    public List<Task> find(String keyword) {
+        String normalizedKeyword = keyword.toLowerCase(Locale.ROOT);
+
+        return tasks.stream()
+                .filter(task -> task.getDescription()
+                        .toLowerCase(Locale.ROOT)
+                        .contains(normalizedKeyword))
                 .toList();
     }
 
