@@ -13,10 +13,11 @@ public class Storage {
         this.filePath = filePath;
     }
 
-    public List<Task> loadTasks() throws IOException {
+    public LoadResult loadTasks() throws IOException {
         ensureDataFileExists();
 
         List<Task> tasks = new ArrayList<>();
+        List<Integer> corruptedLineNumbers = new ArrayList<>();
         List<String> lines = Files.readAllLines(
                 filePath,
                 StandardCharsets.UTF_8
@@ -32,14 +33,11 @@ public class Storage {
             try {
                 tasks.add(Task.fromDataString(line));
             } catch (IllegalArgumentException e) {
-                System.err.println(
-                        "Warning: Skipping corrupted task on line "
-                                + (i + 1) + "."
-                );
+                corruptedLineNumbers.add(i + 1);
             }
         }
 
-        return tasks;
+        return new LoadResult(tasks, corruptedLineNumbers);
     }
 
     public void saveTasks(List<Task> tasks) throws IOException {
@@ -67,6 +65,18 @@ public class Storage {
 
         if (Files.notExists(filePath)) {
             Files.createFile(filePath);
+        }
+    }
+
+    public record LoadResult(
+            List<Task> tasks,
+            List<Integer> corruptedLineNumbers
+    ) {
+        public LoadResult {
+            tasks = List.copyOf(tasks);
+            corruptedLineNumbers = List.copyOf(
+                    corruptedLineNumbers
+            );
         }
     }
 }
