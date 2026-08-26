@@ -47,6 +47,32 @@ class ParserTest {
     }
 
     @Test
+    void parse_findWithKeyword_returnsFindCommand() {
+        Command command = Parser.parse("find   BOOK");
+
+        assertAll(
+                () -> assertEquals(
+                        CommandType.FIND,
+                        command.type()
+                ),
+                () -> assertEquals("BOOK", command.keyword())
+        );
+    }
+
+    @Test
+    void parse_findWithoutKeyword_throwsGeekException() {
+        GeekException exception = assertThrows(
+                GeekException.class,
+                () -> Parser.parse("find   ")
+        );
+
+        assertEquals(
+                "Please provide a keyword after find.",
+                exception.getMessage()
+        );
+    }
+
+    @Test
     void parse_todoWithDescription_returnsAddCommand() {
         Command command = Parser.parse("todo read book");
 

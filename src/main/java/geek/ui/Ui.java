@@ -61,6 +61,26 @@ public class Ui {
         output.println(LINE + "\n");
     }
 
+    /**
+     * Shows tasks whose descriptions match a search keyword.
+     *
+     * @param tasks Matching tasks in their original task-list order.
+     */
+    public void showMatchingTasks(List<Task> tasks) {
+        output.println(LINE);
+        output.println(
+                "Here are the matching tasks in your list:"
+        );
+
+        if (tasks.isEmpty()) {
+            output.println("No matching tasks found.");
+        } else {
+            output.println(formatTasks(tasks));
+        }
+
+        output.println(LINE + "\n");
+    }
+
     public void showTasksOnDate(
             LocalDate date,
             List<Task> tasks

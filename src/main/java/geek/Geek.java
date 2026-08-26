@@ -63,6 +63,12 @@ public class Geek {
                 ui.showTaskList(tasks.getTasks());
                 yield true;
             }
+            case FIND -> {
+                ui.showMatchingTasks(
+                        tasks.find(command.keyword())
+                );
+                yield true;
+            }
             case ON -> {
                 ui.showTasksOnDate(
                         command.date(),

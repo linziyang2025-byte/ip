@@ -18,6 +18,9 @@ public final class Parser {
             return Command.withType(CommandType.BYE);
         } else if (input.equals("list")) {
             return Command.withType(CommandType.LIST);
+        } else if (input.equals("find")
+                || input.startsWith("find ")) {
+            return Command.withKeyword(parseKeyword(input));
         } else if (input.equals("on")
                 || input.startsWith("on ")) {
             return Command.withDate(parseQueryDate(input));
@@ -51,6 +54,27 @@ public final class Parser {
                     "I'm sorry, but I don't know what that means :-("
             );
         }
+    }
+
+    /**
+     * Extracts and validates the keyword from a find command.
+     *
+     * @param input Complete find command.
+     * @return Trimmed keyword to search for.
+     * @throws GeekException If the keyword is missing.
+     */
+    private static String parseKeyword(String input) {
+        String keyword = input
+                .substring("find".length())
+                .trim();
+
+        if (keyword.isEmpty()) {
+            throw new GeekException(
+                    "Please provide a keyword after find."
+            );
+        }
+
+        return keyword;
     }
 
     private static int parseTaskNumber(
@@ -204,6 +228,8 @@ public final class Parser {
     public enum CommandType {
         BYE,
         LIST,
+        /** Finds tasks whose descriptions contain a keyword. */
+        FIND,
         ON,
         MARK,
         UNMARK,
@@ -215,10 +241,11 @@ public final class Parser {
             CommandType type,
             Task task,
             int taskNumber,
-            LocalDate date
+            LocalDate date,
+            String keyword
     ) {
         private static Command withType(CommandType type) {
-            return new Command(type, null, 0, null);
+            return new Command(type, null, 0, null, null);
         }
 
         private static Command withTask(Task task) {
@@ -226,6 +253,7 @@ public final class Parser {
                     CommandType.ADD,
                     task,
                     0,
+                    null,
                     null
             );
         }
@@ -234,11 +262,39 @@ public final class Parser {
                 CommandType type,
                 int taskNumber
         ) {
-            return new Command(type, null, taskNumber, null);
+            return new Command(
+                    type,
+                    null,
+                    taskNumber,
+                    null,
+                    null
+            );
         }
 
         private static Command withDate(LocalDate date) {
-            return new Command(CommandType.ON, null, 0, date);
+            return new Command(
+                    CommandType.ON,
+                    null,
+                    0,
+                    date,
+                    null
+            );
+        }
+
+        /**
+         * Creates a find command containing the specified keyword.
+         *
+         * @param keyword Keyword to search for.
+         * @return Find command carrying the keyword.
+         */
+        private static Command withKeyword(String keyword) {
+            return new Command(
+                    CommandType.FIND,
+                    null,
+                    0,
+                    null,
+                    keyword
+            );
         }
     }
 }
