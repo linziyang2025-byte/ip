@@ -21,12 +21,10 @@ class ParserTest {
         Command byeCommand = Parser.parse("bye");
         Command listCommand = Parser.parse("list");
 
-        assertAll(
-                () -> assertEquals(
+        assertAll(() -> assertEquals(
                         CommandType.BYE,
                         byeCommand.type()
-                ),
-                () -> assertEquals(
+                ), () -> assertEquals(
                         CommandType.LIST,
                         listCommand.type()
                 )
@@ -37,12 +35,10 @@ class ParserTest {
     void parse_markWithValidTaskNumber_returnsMarkCommand() {
         Command command = Parser.parse("mark 3");
 
-        assertAll(
-                () -> assertEquals(
+        assertAll(() -> assertEquals(
                         CommandType.MARK,
                         command.type()
-                ),
-                () -> assertEquals(3, command.taskNumber())
+                ), () -> assertEquals(3, command.taskNumber())
         );
     }
 
@@ -50,20 +46,17 @@ class ParserTest {
     void parse_findWithKeyword_returnsFindCommand() {
         Command command = Parser.parse("find   BOOK");
 
-        assertAll(
-                () -> assertEquals(
+        assertAll(() -> assertEquals(
                         CommandType.FIND,
                         command.type()
-                ),
-                () -> assertEquals("BOOK", command.keyword())
+                ), () -> assertEquals("BOOK", command.keyword())
         );
     }
 
     @Test
     void parse_findWithoutKeyword_throwsGeekException() {
         GeekException exception = assertThrows(
-                GeekException.class,
-                () -> Parser.parse("find   ")
+                GeekException.class, () -> Parser.parse("find   ")
         );
 
         assertEquals(
@@ -76,12 +69,10 @@ class ParserTest {
     void parse_todoWithDescription_returnsAddCommand() {
         Command command = Parser.parse("todo read book");
 
-        assertAll(
-                () -> assertEquals(
+        assertAll(() -> assertEquals(
                         CommandType.ADD,
                         command.type()
-                ),
-                () -> assertEquals(
+                ), () -> assertEquals(
                         "[T][ ] read book",
                         command.task().toString()
                 )
@@ -94,12 +85,10 @@ class ParserTest {
                 "deadline return book /by Dec 2 2019 6:00 PM"
         );
 
-        assertAll(
-                () -> assertEquals(
+        assertAll(() -> assertEquals(
                         CommandType.ADD,
                         command.type()
-                ),
-                () -> assertEquals(
+                ), () -> assertEquals(
                         "[D][ ] return book "
                                 + "(by: Dec 2 2019, 6:00 PM)",
                         command.task().toString()
@@ -115,12 +104,10 @@ class ParserTest {
                         + "/to 2/12/2019 2000"
         );
 
-        assertAll(
-                () -> assertEquals(
+        assertAll(() -> assertEquals(
                         CommandType.ADD,
                         command.type()
-                ),
-                () -> assertEquals(
+                ), () -> assertEquals(
                         "[E][ ] project meeting "
                                 + "(from: Dec 2 2019, 6:00 PM "
                                 + "to: Dec 2 2019, 8:00 PM)",
@@ -133,12 +120,10 @@ class ParserTest {
     void parse_onWithSupportedDate_returnsOnCommand() {
         Command command = Parser.parse("on Dec 2, 2019");
 
-        assertAll(
-                () -> assertEquals(
+        assertAll(() -> assertEquals(
                         CommandType.ON,
                         command.type()
-                ),
-                () -> assertEquals(
+                ), () -> assertEquals(
                         LocalDate.of(2019, 12, 2),
                         command.date()
                 )
@@ -148,8 +133,7 @@ class ParserTest {
     @Test
     void parse_blankInput_throwsGeekException() {
         GeekException exception = assertThrows(
-                GeekException.class,
-                () -> Parser.parse("   ")
+                GeekException.class, () -> Parser.parse("   ")
         );
 
         assertEquals(
@@ -161,16 +145,14 @@ class ParserTest {
     @Test
     void parse_markWithoutTaskNumber_throwsGeekException() {
         assertThrows(
-                GeekException.class,
-                () -> Parser.parse("mark")
+                GeekException.class, () -> Parser.parse("mark")
         );
     }
 
     @Test
     void parse_markWithNonNumericTaskNumber_throwsGeekException() {
         GeekException exception = assertThrows(
-                GeekException.class,
-                () -> Parser.parse("mark three")
+                GeekException.class, () -> Parser.parse("mark three")
         );
 
         assertEquals(
@@ -182,16 +164,14 @@ class ParserTest {
     @Test
     void parse_deadlineWithoutByDelimiter_throwsGeekException() {
         assertThrows(
-                GeekException.class,
-                () -> Parser.parse("deadline return book")
+                GeekException.class, () -> Parser.parse("deadline return book")
         );
     }
 
     @Test
     void parse_eventEndingAtStartTime_throwsGeekException() {
         assertThrows(
-                GeekException.class,
-                () -> Parser.parse(
+                GeekException.class, () -> Parser.parse(
                         "event meeting "
                                 + "/from 2/12/2019 1800 "
                                 + "/to 2/12/2019 1800"
@@ -202,16 +182,14 @@ class ParserTest {
     @Test
     void parse_onWithInvalidDate_throwsGeekException() {
         assertThrows(
-                GeekException.class,
-                () -> Parser.parse("on 2019-02-29")
+                GeekException.class, () -> Parser.parse("on 2019-02-29")
         );
     }
 
     @Test
     void parse_unknownCommand_throwsGeekException() {
         assertThrows(
-                GeekException.class,
-                () -> Parser.parse("sing a song")
+                GeekException.class, () -> Parser.parse("sing a song")
         );
     }
 }

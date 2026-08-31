@@ -36,8 +36,7 @@ class TaskListTest {
         List<Task> returnedTasks = taskList.getTasks();
 
         assertThrows(
-                UnsupportedOperationException.class,
-                () -> returnedTasks.add(Task.newTodo("write notes"))
+                UnsupportedOperationException.class, () -> returnedTasks.add(Task.newTodo("write notes"))
         );
     }
 
@@ -49,10 +48,7 @@ class TaskListTest {
 
         Task deleted = taskList.delete(1);
 
-        assertAll(
-                () -> assertSame(first, deleted),
-                () -> assertEquals(1, taskList.size()),
-                () -> assertEquals(
+        assertAll(() -> assertSame(first, deleted), () -> assertEquals(1, taskList.size()), () -> assertEquals(
                         List.of(second),
                         taskList.getTasks()
                 )
@@ -68,12 +64,10 @@ class TaskListTest {
         String markedStatus = task.getStatus();
         Task unmarked = taskList.unmark(1);
 
-        assertAll(
-                () -> assertSame(task, marked),
-                () -> assertEquals("X", markedStatus),
-                () -> assertSame(task, unmarked),
-                () -> assertEquals(" ", task.getStatus())
-        );
+        assertAll(() -> assertSame(task, marked), () ->
+                assertEquals("X", markedStatus), () ->
+                assertSame(task, unmarked), () ->
+                assertEquals(" ", task.getStatus()));
     }
 
     @Test
@@ -82,18 +76,12 @@ class TaskListTest {
                 List.of(Task.newTodo("only task"))
         );
 
-        assertAll(
-                () -> assertThrows(
-                        GeekException.class,
-                        () -> taskList.mark(0)
-                ),
-                () -> assertThrows(
-                        GeekException.class,
-                        () -> taskList.unmark(2)
-                ),
-                () -> assertThrows(
-                        GeekException.class,
-                        () -> taskList.delete(-1)
+        assertAll(() -> assertThrows(
+                        GeekException.class, () -> taskList.mark(0)
+                ), () -> assertThrows(
+                        GeekException.class, () -> taskList.unmark(2)
+                ), () -> assertThrows(
+                        GeekException.class, () -> taskList.delete(-1)
                 )
         );
     }

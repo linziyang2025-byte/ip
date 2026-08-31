@@ -23,18 +23,14 @@ class TaskTest {
         assertEquals("[T][ ] read book", todo.toString());
 
         todo.mark();
-        assertAll(
-                () -> assertEquals("X", todo.getStatus()),
-                () -> assertEquals(
+        assertAll(() -> assertEquals("X", todo.getStatus()), () -> assertEquals(
                         "[T][X] read book",
                         todo.toString()
                 )
         );
 
         todo.unmark();
-        assertAll(
-                () -> assertEquals(" ", todo.getStatus()),
-                () -> assertEquals(
+        assertAll(() -> assertEquals(" ", todo.getStatus()), () -> assertEquals(
                         "[T][ ] read book",
                         todo.toString()
                 )
@@ -48,17 +44,14 @@ class TaskTest {
                 "2/12/2019"
         );
 
-        assertAll(
-                () -> assertEquals(
+        assertAll(() -> assertEquals(
                         "[D][ ] return book (by: Dec 2 2019)",
                         deadline.toString()
-                ),
-                () -> assertTrue(
+                ), () -> assertTrue(
                         deadline.occursOn(
                                 LocalDate.of(2019, 12, 2)
                         )
-                ),
-                () -> assertFalse(
+                ), () -> assertFalse(
                         deadline.occursOn(
                                 LocalDate.of(2019, 12, 3)
                         )
@@ -87,28 +80,23 @@ class TaskTest {
                 "4/12/2019 0100"
         );
 
-        assertAll(
-                () -> assertFalse(
+        assertAll(() -> assertFalse(
                         event.occursOn(
                                 LocalDate.of(2019, 12, 1)
                         )
-                ),
-                () -> assertTrue(
+                ), () -> assertTrue(
                         event.occursOn(
                                 LocalDate.of(2019, 12, 2)
                         )
-                ),
-                () -> assertTrue(
+                ), () -> assertTrue(
                         event.occursOn(
                                 LocalDate.of(2019, 12, 3)
                         )
-                ),
-                () -> assertTrue(
+                ), () -> assertTrue(
                         event.occursOn(
                                 LocalDate.of(2019, 12, 4)
                         )
-                ),
-                () -> assertFalse(
+                ), () -> assertFalse(
                         event.occursOn(
                                 LocalDate.of(2019, 12, 5)
                         )
@@ -118,18 +106,14 @@ class TaskTest {
 
     @Test
     void newEvent_endNotAfterStart_throwsGeekException() {
-        assertAll(
-                () -> assertThrows(
-                        GeekException.class,
-                        () -> Task.newEvent(
+        assertAll(() -> assertThrows(
+                        GeekException.class, () -> Task.newEvent(
                                 "meeting",
                                 "2/12/2019 1800",
                                 "2/12/2019 1800"
                         )
-                ),
-                () -> assertThrows(
-                        GeekException.class,
-                        () -> Task.newEvent(
+                ), () -> assertThrows(
+                        GeekException.class, () -> Task.newEvent(
                                 "meeting",
                                 "2/12/2019 1800",
                                 "2/12/2019 1700"
@@ -152,29 +136,20 @@ class TaskTest {
                 "2/12/2019 2000"
         );
 
-        assertAll(
-                () -> assertRoundTrip(todo),
-                () -> assertRoundTrip(deadline),
-                () -> assertRoundTrip(event)
+        assertAll(() -> assertRoundTrip(todo), () -> assertRoundTrip(deadline), () -> assertRoundTrip(event)
         );
     }
 
     @Test
     void fromDataString_malformedData_throwsException() {
-        assertAll(
-                () -> assertThrows(
-                        IllegalArgumentException.class,
-                        () -> Task.fromDataString("T\t0")
-                ),
-                () -> assertThrows(
-                        IllegalArgumentException.class,
-                        () -> Task.fromDataString(
+        assertAll(() -> assertThrows(
+                        IllegalArgumentException.class, () -> Task.fromDataString("T\t0")
+                ), () -> assertThrows(
+                        IllegalArgumentException.class, () -> Task.fromDataString(
                                 "T\t2\tcmVhZCBib29r"
                         )
-                ),
-                () -> assertThrows(
-                        IllegalArgumentException.class,
-                        () -> Task.fromDataString(
+                ), () -> assertThrows(
+                        IllegalArgumentException.class, () -> Task.fromDataString(
                                 "X\t0\tcmVhZCBib29r"
                         )
                 )
@@ -186,12 +161,10 @@ class TaskTest {
                 original.toDataString()
         );
 
-        assertAll(
-                () -> assertEquals(
+        assertAll(() -> assertEquals(
                         original.toDataString(),
                         restored.toDataString()
-                ),
-                () -> assertEquals(
+                ), () -> assertEquals(
                         original.toString(),
                         restored.toString()
                 )

@@ -29,13 +29,9 @@ class StorageTest {
 
         Storage.LoadResult result = storage.loadTasks();
 
-        assertAll(
-                () -> assertTrue(Files.exists(filePath)),
-                () -> assertTrue(result.tasks().isEmpty()),
-                () -> assertTrue(
-                        result.corruptedLineNumbers().isEmpty()
-                )
-        );
+        assertAll(() -> assertTrue(Files.exists(filePath)), () ->
+                assertTrue(result.tasks().isEmpty()), () ->
+                assertTrue(result.corruptedLineNumbers().isEmpty()));
     }
 
     @Test
@@ -59,16 +55,14 @@ class StorageTest {
         storage.saveTasks(originalTasks);
         Storage.LoadResult result = storage.loadTasks();
 
-        assertAll(
-                () -> assertEquals(
+        assertAll(() -> assertEquals(
                         originalTasks.stream()
                                 .map(Task::toDataString)
                                 .toList(),
                         result.tasks().stream()
                                 .map(Task::toDataString)
                                 .toList()
-                ),
-                () -> assertTrue(
+                ), () -> assertTrue(
                         result.corruptedLineNumbers().isEmpty()
                 )
         );
@@ -97,8 +91,7 @@ class StorageTest {
 
         Storage.LoadResult result = storage.loadTasks();
 
-        assertAll(
-                () -> assertEquals(
+        assertAll(() -> assertEquals(
                         List.of(
                                 first.toDataString(),
                                 second.toDataString()
@@ -106,8 +99,7 @@ class StorageTest {
                         result.tasks().stream()
                                 .map(Task::toDataString)
                                 .toList()
-                ),
-                () -> assertEquals(
+                ), () -> assertEquals(
                         List.of(3),
                         result.corruptedLineNumbers()
                 )
