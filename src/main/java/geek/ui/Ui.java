@@ -56,9 +56,7 @@ public class Ui {
      * @param message Response to show.
      */
     public void showResponse(String message) {
-        output.println(LINE);
-        output.println(message);
-        output.println(LINE + "\n");
+        printLines(LINE, message, LINE, "");
     }
 
     /**
@@ -66,5 +64,16 @@ public class Ui {
      */
     public void close() {
         scanner.close();
+    }
+
+    /**
+     * Writes any number of lines to the normal output stream in order.
+     *
+     * @param lines Lines to write.
+     */
+    private void printLines(String... lines) {
+        for (String line : lines) {
+            output.println(line);
+        }
     }
 }
