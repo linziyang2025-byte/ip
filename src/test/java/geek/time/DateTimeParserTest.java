@@ -26,24 +26,19 @@ class DateTimeParserTest {
 
     @Test
     void parseDate_supportedFormats_returnSameDate() {
-        assertAll(
-                () -> assertEquals(
+        assertAll(() -> assertEquals(
                         EXPECTED_DATE,
                         DateTimeParser.parseDate("2019-12-02")
-                ),
-                () -> assertEquals(
+                ), () -> assertEquals(
                         EXPECTED_DATE,
                         DateTimeParser.parseDate("2/12/2019")
-                ),
-                () -> assertEquals(
+                ), () -> assertEquals(
                         EXPECTED_DATE,
                         DateTimeParser.parseDate("2-12-2019")
-                ),
-                () -> assertEquals(
+                ), () -> assertEquals(
                         EXPECTED_DATE,
                         DateTimeParser.parseDate("2 Dec 2019")
-                ),
-                () -> assertEquals(
+                ), () -> assertEquals(
                         EXPECTED_DATE,
                         DateTimeParser.parseDate("Dec 2, 2019")
                 )
@@ -62,8 +57,7 @@ class DateTimeParserTest {
     @Test
     void parseDate_invalidCalendarDate_throwsException() {
         assertThrows(
-                DateTimeParseException.class,
-                () -> DateTimeParser.parseDate("2019-02-29")
+                DateTimeParseException.class, () -> DateTimeParser.parseDate("2019-02-29")
         );
     }
 
@@ -88,8 +82,7 @@ class DateTimeParserTest {
     @Test
     void parseDateTime_dateWithoutTime_throwsException() {
         assertThrows(
-                DateTimeParseException.class,
-                () -> DateTimeParser.parseDateTime("2019-12-02")
+                DateTimeParseException.class, () -> DateTimeParser.parseDateTime("2019-12-02")
         );
     }
 
@@ -99,12 +92,10 @@ class DateTimeParserTest {
                 "2019-12-02"
         );
 
-        assertAll(
-                () -> assertEquals(
+        assertAll(() -> assertEquals(
                         EXPECTED_DATE.atStartOfDay(),
                         result.value()
-                ),
-                () -> assertFalse(result.hasTime())
+                ), () -> assertFalse(result.hasTime())
         );
     }
 
@@ -114,12 +105,10 @@ class DateTimeParserTest {
                 "2019-12-02 18:00"
         );
 
-        assertAll(
-                () -> assertEquals(
+        assertAll(() -> assertEquals(
                         EXPECTED_DATE_TIME,
                         result.value()
-                ),
-                () -> assertTrue(result.hasTime())
+                ), () -> assertTrue(result.hasTime())
         );
     }
 
@@ -132,25 +121,20 @@ class DateTimeParserTest {
                         "2019-12-02T18:00"
                 );
 
-        assertAll(
-                () -> assertEquals(
+        assertAll(() -> assertEquals(
                         EXPECTED_DATE.atStartOfDay(),
                         dateOnly.value()
-                ),
-                () -> assertFalse(dateOnly.hasTime()),
-                () -> assertEquals(
+                ), () -> assertFalse(dateOnly.hasTime()), () -> assertEquals(
                         EXPECTED_DATE_TIME,
                         dateTime.value()
-                ),
-                () -> assertTrue(dateTime.hasTime())
+                ), () -> assertTrue(dateTime.hasTime())
         );
     }
 
     @Test
     void parseStoredDeadline_invalidValue_throwsException() {
         assertThrows(
-                DateTimeParseException.class,
-                () -> DateTimeParser.parseStoredDeadline("not-a-date")
+                DateTimeParseException.class, () -> DateTimeParser.parseStoredDeadline("not-a-date")
         );
     }
 }
