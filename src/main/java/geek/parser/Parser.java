@@ -26,46 +26,70 @@ public final class Parser {
     public static Command parse(String input) {
         if (input == null || input.isBlank()) {
             throw new GeekException("Please enter a command.");
-        } else if (input.equals("bye")) {
+        }
+
+        if (input.equals("bye")) {
             return Command.withType(CommandType.BYE);
-        } else if (input.equals("list")) {
+        }
+
+        if (input.equals("list")) {
             return Command.withType(CommandType.LIST);
-        } else if (input.equals("find")
-                || input.startsWith("find ")) {
+        }
+
+        if (matchesCommand(input, "find")) {
             return Command.withKeyword(parseKeyword(input));
-        } else if (input.equals("on")
-                || input.startsWith("on ")) {
+        }
+
+        if (matchesCommand(input, "on")) {
             return Command.withDate(parseQueryDate(input));
-        } else if (input.equals("mark")
-                || input.startsWith("mark ")) {
+        }
+
+        if (matchesCommand(input, "mark")) {
             return Command.withTaskNumber(
                     CommandType.MARK,
                     parseTaskNumber(input, "mark")
             );
-        } else if (input.equals("unmark")
-                || input.startsWith("unmark ")) {
+        }
+
+        if (matchesCommand(input, "unmark")) {
             return Command.withTaskNumber(
                     CommandType.UNMARK,
                     parseTaskNumber(input, "unmark")
             );
-        } else if (input.equals("delete")
-                || input.startsWith("delete ")) {
+        }
+
+        if (matchesCommand(input, "delete")) {
             return Command.withTaskNumber(
                     CommandType.DELETE,
                     parseTaskNumber(input, "delete")
             );
-        } else if (input.startsWith("todo ")
-                || input.equals("todo")
-                || input.startsWith("deadline ")
-                || input.equals("deadline")
-                || input.startsWith("event ")
-                || input.equals("event")) {
-            return Command.withTask(parseTask(input));
-        } else {
-            throw new GeekException(
-                    "I'm sorry, but I don't know what that means :-("
-            );
         }
+
+        if (matchesCommand(input, "todo")
+                || matchesCommand(input, "deadline")
+                || matchesCommand(input, "event")) {
+            return Command.withTask(parseTask(input));
+        }
+
+        throw new GeekException(
+                "I'm sorry, but I don't know what that means :-("
+        );
+    }
+
+    /**
+     * Returns whether input contains the given command word, optionally
+     * followed by arguments separated by a space.
+     *
+     * @param input Complete user input.
+     * @param command Command word to match.
+     * @return {@code true} if input starts with the complete command word.
+     */
+    private static boolean matchesCommand(
+            String input,
+            String command
+    ) {
+        return input.equals(command)
+                || input.startsWith(command + " ");
     }
 
     /**
@@ -151,14 +175,15 @@ public final class Parser {
     }
 
     private static Task parseTask(String input) {
-        if (input.equals("todo")
-                || input.startsWith("todo ")) {
+        if (matchesCommand(input, "todo")) {
             return parseTodo(input);
-        } else if (input.equals("deadline")
-                || input.startsWith("deadline ")) {
+        }
+
+        if (matchesCommand(input, "deadline")) {
             return parseDeadline(input);
-        } else if (input.equals("event")
-                || input.startsWith("event ")) {
+        }
+
+        if (matchesCommand(input, "event")) {
             return parseEvent(input);
         }
 
