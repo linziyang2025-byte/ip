@@ -392,7 +392,7 @@ public abstract class Task {
      */
     private static class Todo extends Task {
         private Todo(String description) {
-            super(description);
+            this(description, false);
         }
 
         private Todo(String description, boolean isDone) {
@@ -429,9 +429,7 @@ public abstract class Task {
                 LocalDateTime deadline,
                 boolean hasTime
         ) {
-            super(description);
-            this.deadline = deadline;
-            this.hasTime = hasTime;
+            this(description, deadline, hasTime, false);
         }
 
         private Deadline(
@@ -495,9 +493,7 @@ public abstract class Task {
                 LocalDateTime startTime,
                 LocalDateTime endTime
         ) {
-            super(description);
-            this.startTime = startTime;
-            this.endTime = endTime;
+            this(description, startTime, endTime, false);
         }
 
         private Event(

@@ -98,10 +98,6 @@ public class Geek {
                             + "2/12/2019 1800, or "
                             + "Dec 2 2019 6:00 PM."
             );
-        } catch (NumberFormatException e) {
-            return continuingError(
-                    "Please enter a valid task number."
-            );
         }
     }
 
