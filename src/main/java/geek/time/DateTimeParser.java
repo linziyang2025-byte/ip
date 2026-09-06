@@ -6,7 +6,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -178,13 +177,9 @@ public final class DateTimeParser {
      * @return Unmodifiable list of date formatters.
      */
     private static List<DateTimeFormatter> createDateFormatters() {
-        List<DateTimeFormatter> formatters = new ArrayList<>();
-
-        for (String pattern : DATE_PATTERNS) {
-            formatters.add(createFormatter(pattern));
-        }
-
-        return List.copyOf(formatters);
+        return DATE_PATTERNS.stream()
+                .map(DateTimeParser::createFormatter)
+                .toList();
     }
 
     /**
@@ -194,19 +189,12 @@ public final class DateTimeParser {
      * @return Unmodifiable list of date-time formatters.
      */
     private static List<DateTimeFormatter> createDateTimeFormatters() {
-        List<DateTimeFormatter> formatters = new ArrayList<>();
-
-        for (String datePattern : DATE_PATTERNS) {
-            for (String timePattern : TIME_PATTERNS) {
-                formatters.add(
-                        createFormatter(
+        return DATE_PATTERNS.stream()
+                .flatMap(datePattern -> TIME_PATTERNS.stream()
+                        .map(timePattern -> createFormatter(
                                 datePattern + " " + timePattern
-                        )
-                );
-            }
-        }
-
-        return List.copyOf(formatters);
+                        )))
+                .toList();
     }
 
     /**

@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import geek.task.Task;
 
@@ -147,18 +149,12 @@ public final class MessageFormatter {
     }
 
     private static String formatTasks(List<Task> tasks) {
-        StringBuilder result = new StringBuilder();
-
-        for (int i = 0; i < tasks.size(); i++) {
-            result.append(i + 1)
-                    .append(". ")
-                    .append(tasks.get(i));
-
-            if (i < tasks.size() - 1) {
-                result.append("\n");
-            }
-        }
-
-        return result.toString();
+        return IntStream.range(0, tasks.size())
+                .mapToObj(index -> String.format(
+                        "%d. %s",
+                        index + 1,
+                        tasks.get(index)
+                ))
+                .collect(Collectors.joining("\n"));
     }
 }
