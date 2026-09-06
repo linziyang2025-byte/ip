@@ -106,6 +106,10 @@ public class Geek {
     }
 
     private CommandResult execute(Parser.Command command) {
+        assert command != null : "Parser must return a command.";
+        assert command.type() != null
+                : "A parsed command must have a type.";
+
         return switch (command.type()) {
             case BYE -> new CommandResult(
                     MessageFormatter.goodbye(),
@@ -114,17 +118,27 @@ public class Geek {
             case LIST -> continuingResponse(
                     MessageFormatter.taskList(tasks.getTasks())
             );
-            case FIND -> continuingResponse(
-                    MessageFormatter.matchingTasks(
-                            tasks.find(command.keyword())
-                    )
-            );
-            case ON -> continuingResponse(
-                    MessageFormatter.tasksOnDate(
-                        command.date(),
-                        tasks.findOn(command.date())
-                    )
-            );
+            case FIND -> {
+                assert command.keyword() != null
+                        : "A find command must have a keyword.";
+
+                yield continuingResponse(
+                        MessageFormatter.matchingTasks(
+                                tasks.find(command.keyword())
+                        )
+                );
+            }
+            case ON -> {
+                assert command.date() != null
+                        : "An on command must have a date.";
+
+                yield continuingResponse(
+                        MessageFormatter.tasksOnDate(
+                            command.date(),
+                            tasks.findOn(command.date())
+                        )
+                );
+            }
             case MARK -> {
                 Task task = tasks.mark(command.taskNumber());
 
@@ -151,6 +165,9 @@ public class Geek {
             }
             case ADD -> {
                 Task task = command.task();
+                assert task != null
+                        : "An add command must have a task.";
+
                 tasks.add(task);
 
                 yield continuingSavedResponse(

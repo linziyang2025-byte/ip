@@ -138,6 +138,8 @@ public class TaskList {
      */
     private Task getTask(int taskNumber) {
         checkTaskNumber(taskNumber);
+        assert taskNumber >= 1 && taskNumber <= tasks.size()
+                : "A validated task number must identify a task.";
         return tasks.get(taskNumber - 1);
     }
 
