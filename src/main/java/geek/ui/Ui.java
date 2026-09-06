@@ -56,7 +56,9 @@ public class Ui {
      * @param message Response to show.
      */
     public void showResponse(String message) {
-        printLines(LINE, message, LINE, "");
+        printLines(LINE);
+        printLines(message.split("\\R", -1));
+        printLines(LINE, "");
     }
 
     /**
