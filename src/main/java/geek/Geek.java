@@ -114,6 +114,15 @@ public class Geek {
             case LIST -> continuingResponse(
                     MessageFormatter.taskList(tasks.getTasks())
             );
+            case SORT -> {
+                tasks.sortChronologically();
+
+                yield continuingSavedResponse(
+                        MessageFormatter.tasksSorted(
+                                tasks.getTasks()
+                        )
+                );
+            }
             case FIND -> {
                 assert command.keyword() != null
                         : "A find command must have a keyword.";

@@ -1,9 +1,11 @@
 package geek.task;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import geek.exception.GeekException;
 
@@ -110,6 +112,16 @@ public class TaskList {
     }
 
     /**
+     * Sorts dated tasks from earliest to latest and places undated tasks last.
+     *
+     * Tasks with the same date-time, as well as undated tasks, retain their
+     * relative order because {@link List#sort} is stable.
+     */
+    public void sortChronologically() {
+        tasks.sort(TaskList::compareChronologically);
+    }
+
+    /**
      * Returns an unmodifiable snapshot of the current task list.
      *
      * The task objects themselves are not copied.
@@ -155,5 +167,26 @@ public class TaskList {
                     "That task number does not exist."
             );
         }
+    }
+
+    private static int compareChronologically(
+            Task first,
+            Task second
+    ) {
+        Optional<LocalDateTime> firstDateTime =
+                first.getSortDateTime();
+        Optional<LocalDateTime> secondDateTime =
+                second.getSortDateTime();
+
+        if (firstDateTime.isEmpty()) {
+            return secondDateTime.isEmpty() ? 0 : 1;
+        }
+
+        if (secondDateTime.isEmpty()) {
+            return -1;
+        }
+
+        return firstDateTime.orElseThrow()
+                .compareTo(secondDateTime.orElseThrow());
     }
 }

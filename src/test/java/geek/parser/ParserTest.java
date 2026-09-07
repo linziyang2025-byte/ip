@@ -20,6 +20,7 @@ class ParserTest {
     void parse_simpleCommands_returnsMatchingCommandTypes() {
         Command byeCommand = Parser.parse("bye");
         Command listCommand = Parser.parse("list");
+        Command sortCommand = Parser.parse("sort");
 
         assertAll(() -> assertEquals(
                         CommandType.BYE,
@@ -27,7 +28,22 @@ class ParserTest {
                 ), () -> assertEquals(
                         CommandType.LIST,
                         listCommand.type()
+                ), () -> assertEquals(
+                        CommandType.SORT,
+                        sortCommand.type()
                 )
+        );
+    }
+
+    @Test
+    void parse_sortWithArguments_throwsGeekException() {
+        GeekException exception = assertThrows(
+                GeekException.class, () -> Parser.parse("sort date")
+        );
+
+        assertEquals(
+                "The sort command does not accept arguments.",
+                exception.getMessage()
         );
     }
 

@@ -134,4 +134,60 @@ class TaskListTest {
 
         assertEquals(List.of(), taskList.find("notes"));
     }
+
+    @Test
+    void sortChronologically_mixedTasks_sortsDatedTasksAndKeepsTodosLast() {
+        Task firstTodo = Task.newTodo("read book");
+        Task laterDeadline = Task.newDeadline(
+                "submit report",
+                "3/12/2019"
+        );
+        Task event = Task.newEvent(
+                "morning meeting",
+                "2/12/2019 0900",
+                "2/12/2019 1000"
+        );
+        Task earlierDeadline = Task.newDeadline(
+                "return book",
+                "2/12/2019"
+        );
+        Task secondTodo = Task.newTodo("write notes");
+        TaskList taskList = new TaskList(
+                List.of(
+                        firstTodo,
+                        laterDeadline,
+                        event,
+                        earlierDeadline,
+                        secondTodo
+                )
+        );
+
+        taskList.sortChronologically();
+
+        assertEquals(
+                List.of(
+                        earlierDeadline,
+                        event,
+                        laterDeadline,
+                        firstTodo,
+                        secondTodo
+                ),
+                taskList.getTasks()
+        );
+    }
+
+    @Test
+    void sortChronologically_equalDateTimes_preservesOriginalOrder() {
+        Task first = Task.newDeadline("first", "2/12/2019");
+        Task second = Task.newEvent(
+                "second",
+                "2/12/2019 0000",
+                "2/12/2019 0100"
+        );
+        TaskList taskList = new TaskList(List.of(first, second));
+
+        taskList.sortChronologically();
+
+        assertEquals(List.of(first, second), taskList.getTasks());
+    }
 }

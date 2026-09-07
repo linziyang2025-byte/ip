@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Base64;
 import java.util.Locale;
+import java.util.Optional;
 
 import geek.exception.GeekException;
 import geek.time.DateTimeParser;
@@ -328,6 +329,18 @@ public abstract class Task {
     }
 
     /**
+     * Returns the date-time used to place this task in chronological order.
+     *
+     * Undated tasks return an empty value. A deadline uses its due time, while
+     * an event uses its start time.
+     *
+     * @return Date-time used for sorting, or an empty value if undated.
+     */
+    public Optional<LocalDateTime> getSortDateTime() {
+        return Optional.empty();
+    }
+
+    /**
      * Encodes a storage field using URL-safe Base64 without padding.
      *
      * @param value Value to encode.
@@ -466,6 +479,11 @@ public abstract class Task {
         }
 
         @Override
+        public Optional<LocalDateTime> getSortDateTime() {
+            return Optional.of(deadline);
+        }
+
+        @Override
         public String toString() {
             String formattedDeadline = hasTime
                     ? deadline.format(DISPLAY_DATE_TIME_FORMAT)
@@ -533,6 +551,11 @@ public abstract class Task {
 
             return !date.isBefore(startDate)
                     && !date.isAfter(endDate);
+        }
+
+        @Override
+        public Optional<LocalDateTime> getSortDateTime() {
+            return Optional.of(startTime);
         }
 
         @Override
