@@ -36,6 +36,16 @@ public final class Parser {
             return Command.withType(CommandType.LIST);
         }
 
+        if (input.equals("sort")) {
+            return Command.withType(CommandType.SORT);
+        }
+
+        if (matchesCommand(input, "sort")) {
+            throw new GeekException(
+                    "The sort command does not accept arguments."
+            );
+        }
+
         if (matchesCommand(input, "find")) {
             return Command.withKeyword(parseKeyword(input));
         }
@@ -306,6 +316,8 @@ public final class Parser {
         BYE,
         /** Shows every task. */
         LIST,
+        /** Sorts dated tasks chronologically and places undated tasks last. */
+        SORT,
         /** Finds tasks whose descriptions contain a keyword. */
         FIND,
         /** Shows dated tasks occurring on a specified date. */

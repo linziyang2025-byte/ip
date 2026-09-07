@@ -26,4 +26,20 @@ class MessageFormatterTest {
                 MessageFormatter.taskList(tasks)
         );
     }
+
+    @Test
+    void tasksSorted_multipleTasks_explainsOrderAndNumbersTasks() {
+        List<Task> tasks = List.of(
+                Task.newDeadline("submit report", "2/12/2019"),
+                Task.newTodo("read book")
+        );
+
+        assertEquals(
+                "I've sorted your tasks chronologically. "
+                        + "Tasks without dates are listed last:\n"
+                        + "1. [D][ ] submit report (by: Dec 2 2019)\n"
+                        + "2. [T][ ] read book",
+                MessageFormatter.tasksSorted(tasks)
+        );
+    }
 }

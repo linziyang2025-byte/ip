@@ -57,6 +57,22 @@ public final class MessageFormatter {
     }
 
     /**
+     * Formats confirmation that tasks were sorted chronologically.
+     *
+     * @param tasks Tasks in their new display order.
+     * @return Sort confirmation and the sorted task list.
+     */
+    public static String tasksSorted(List<Task> tasks) {
+        if (tasks.isEmpty()) {
+            return "Your task list is empty. Nothing to sort.";
+        }
+
+        return "I've sorted your tasks chronologically. "
+                + "Tasks without dates are listed last:\n"
+                + formatTasks(tasks);
+    }
+
+    /**
      * Formats tasks matching a search keyword.
      *
      * @param tasks Matching tasks.

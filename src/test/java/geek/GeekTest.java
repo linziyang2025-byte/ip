@@ -64,4 +64,35 @@ class GeekTest {
                 geek.getResponse("bye")
         );
     }
+
+    @Test
+    void getResponse_sortCommand_sortsAndPersistsTaskOrder() {
+        Path filePath = tempDirectory.resolve("geek.txt");
+        Geek firstSession = new Geek(filePath.toString());
+        firstSession.getResponse("todo read book");
+        firstSession.getResponse(
+                "deadline submit report /by 3/12/2019"
+        );
+        firstSession.getResponse(
+                "event meeting /from 2/12/2019 0900 "
+                        + "/to 2/12/2019 1000"
+        );
+
+        String sortResponse = firstSession.getResponse("sort");
+        Geek secondSession = new Geek(filePath.toString());
+        String reloadedList = secondSession.getResponse("list");
+
+        assertAllTasksAreChronological(sortResponse);
+        assertAllTasksAreChronological(reloadedList);
+    }
+
+    private static void assertAllTasksAreChronological(String response) {
+        int eventIndex = response.indexOf("[E][ ] meeting");
+        int deadlineIndex = response.indexOf("[D][ ] submit report");
+        int todoIndex = response.indexOf("[T][ ] read book");
+
+        assertTrue(eventIndex >= 0);
+        assertTrue(eventIndex < deadlineIndex);
+        assertTrue(deadlineIndex < todoIndex);
+    }
 }
