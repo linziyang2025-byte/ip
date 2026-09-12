@@ -22,6 +22,16 @@
     -fx-text-fill: white;
 }
 
+.alert-dialog .dialog-label {
+    -fx-background-color: linear-gradient(to bottom right, #491c2b, #321a2a);
+    -fx-border-color: rgba(255, 107, 138, 0.78);
+    -fx-text-fill: #ffe8ee;
+}
+
 .dialog-box .image-view {
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.38), 14, 0.2, 0, 3);
+}
+
+.alert-dialog .image-view {
+    -fx-effect: dropshadow(gaussian, rgba(255, 107, 138, 0.48), 14, 0.2, 0, 2);
 }

@@ -19,6 +19,8 @@ import javafx.scene.layout.HBox;
 public class DialogBox extends HBox {
     private static final String DIALOG_BOX_FXML =
             "/view/DialogBox.fxml";
+    private static final String ERROR_PREFIX = "OOPS!!! ";
+    private static final String WARNING_PREFIX = "Warning: ";
 
     @FXML
     private Label dialog;
@@ -76,7 +78,27 @@ public class DialogBox extends HBox {
         DialogBox dialogBox = new DialogBox(text, image);
         dialogBox.flip();
         dialogBox.getStyleClass().add("geek-dialog");
+
+        if (requiresAttention(text)) {
+            dialogBox.getStyleClass().add("alert-dialog");
+        }
+
         return dialogBox;
+    }
+
+    /**
+     * Returns whether a response should use the attention-grabbing style.
+     *
+     * An error can be the whole response or follow a successful action when
+     * only persistence failed. Corrupted saved data is reported as a warning.
+     *
+     * @param text Geek response to classify.
+     * @return {@code true} for an error or saved-data warning.
+     */
+    static boolean requiresAttention(String text) {
+        return text.startsWith(ERROR_PREFIX)
+                || text.startsWith(WARNING_PREFIX)
+                || text.contains("\n\n" + ERROR_PREFIX);
     }
 
     private void flip() {
