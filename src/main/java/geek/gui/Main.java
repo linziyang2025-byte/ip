@@ -40,7 +40,7 @@ public class Main extends Application {
                         .toExternalForm()
         );
 
-        stage.setTitle("Geek — Task Companion");
+        stage.setTitle("Geek — Calm Mission Control");
         stage.setMinWidth(500);
         stage.setMinHeight(620);
         stage.setScene(scene);

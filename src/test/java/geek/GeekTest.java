@@ -33,8 +33,8 @@ class GeekTest {
         String markResponse = geek.getResponse("mark 1");
         String listResponse = geek.getResponse("list");
 
-        assertTrue(addResponse.contains("I've added this task"));
-        assertTrue(markResponse.contains("marked this task as done"));
+        assertTrue(addResponse.contains("Task logged."));
+        assertTrue(markResponse.contains("Mission complete"));
         assertTrue(listResponse.contains("[T][X] read book"));
     }
 
@@ -68,7 +68,8 @@ class GeekTest {
                 geek.getResponse("   ")
         );
         assertEquals(
-                "Bye. Hope to see you again soon!",
+                "Mission paused. Powering down for now—"
+                        + "see you next time!",
                 geek.getResponse("bye")
         );
     }
@@ -144,7 +145,7 @@ class GeekTest {
 
         assertEquals(
                 "OOPS!!! I could not load the saved tasks.\n\n"
-                        + "Your task list is empty.",
+                        + "Your mission board is clear.",
                 response
         );
     }
@@ -163,7 +164,7 @@ class GeekTest {
 
         assertAll(() -> assertTrue(
                         addResponse.contains(
-                                "I've added this task"
+                                "Task logged."
                         )
                 ), () -> assertTrue(
                         addResponse.contains(

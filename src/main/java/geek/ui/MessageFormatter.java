@@ -28,8 +28,8 @@ public final class MessageFormatter {
      * @return Welcome message.
      */
     public static String welcome() {
-        return "Hello! I'm Geek.\n"
-                + "What can I do for you?";
+        return "Systems online. I'm Geek, your calm mission control.\n"
+                + "What are we tackling next?";
     }
 
     /**
@@ -38,7 +38,8 @@ public final class MessageFormatter {
      * @return Goodbye message.
      */
     public static String goodbye() {
-        return "Bye. Hope to see you again soon!";
+        return "Mission paused. Powering down for now—"
+                + "see you next time!";
     }
 
     /**
@@ -49,10 +50,10 @@ public final class MessageFormatter {
      */
     public static String taskList(List<Task> tasks) {
         if (tasks.isEmpty()) {
-            return "Your task list is empty.";
+            return "Your mission board is clear.";
         }
 
-        return "Here are the tasks in your list:\n"
+        return "Here's what's on your mission board:\n"
                 + formatTasks(tasks);
     }
 
@@ -64,11 +65,11 @@ public final class MessageFormatter {
      */
     public static String tasksSorted(List<Task> tasks) {
         if (tasks.isEmpty()) {
-            return "Your task list is empty. Nothing to sort.";
+            return "Your mission board is clear. Nothing to align.";
         }
 
-        return "I've sorted your tasks chronologically. "
-                + "Tasks without dates are listed last:\n"
+        return "Timeline aligned. Dated tasks come first, "
+                + "with undated tasks after them:\n"
                 + formatTasks(tasks);
     }
 
@@ -80,10 +81,10 @@ public final class MessageFormatter {
      */
     public static String matchingTasks(List<Task> tasks) {
         if (tasks.isEmpty()) {
-            return "No matching tasks found.";
+            return "Nothing matching that signal is on your mission board.";
         }
 
-        return "Here are the matching tasks in your list:\n"
+        return "I found these matching tasks on your mission board:\n"
                 + formatTasks(tasks);
     }
 
@@ -98,11 +99,11 @@ public final class MessageFormatter {
             LocalDate date,
             List<Task> tasks
     ) {
-        String heading = "Here are the tasks on "
+        String heading = "Mission schedule for "
                 + date.format(DISPLAY_DATE_FORMAT) + ":";
 
         if (tasks.isEmpty()) {
-            return heading + "\nNo tasks found.";
+            return heading + "\nNo tasks are on the radar.";
         }
 
         return heading + "\n" + formatTasks(tasks);
@@ -116,9 +117,9 @@ public final class MessageFormatter {
      * @return Addition response.
      */
     public static String taskAdded(Task task, int taskCount) {
-        return "Got it. I've added this task:\n  " + task
-                + "\nNow you have " + taskCount
-                + " tasks in the list.";
+        return "Task logged. One less thing to keep in your head:\n  "
+                + task + "\nYou now have " + taskCount
+                + taskNoun(taskCount) + " on the mission board.";
     }
 
     /**
@@ -128,7 +129,7 @@ public final class MessageFormatter {
      * @return Mark response.
      */
     public static String taskMarked(Task task) {
-        return "Nice! I've marked this task as done:\n  " + task;
+        return "Mission complete—nice work:\n  " + task;
     }
 
     /**
@@ -138,7 +139,7 @@ public final class MessageFormatter {
      * @return Unmark response.
      */
     public static String taskUnmarked(Task task) {
-        return "OK, I've marked this task as not done yet:\n  " + task;
+        return "No pressure. This task is back on the radar:\n  " + task;
     }
 
     /**
@@ -149,9 +150,9 @@ public final class MessageFormatter {
      * @return Deletion response.
      */
     public static String taskDeleted(Task task, int taskCount) {
-        return "Noted. I've removed this task:\n  " + task
-                + "\nNow you have " + taskCount
-                + " tasks in the list.";
+        return "Cleared from the mission board:\n  " + task
+                + "\nYou now have " + taskCount
+                + taskNoun(taskCount) + " on the board.";
     }
 
     /**
@@ -172,5 +173,9 @@ public final class MessageFormatter {
                         tasks.get(index)
                 ))
                 .collect(Collectors.joining("\n"));
+    }
+
+    private static String taskNoun(int taskCount) {
+        return taskCount == 1 ? " task" : " tasks";
     }
 }

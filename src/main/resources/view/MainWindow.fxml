@@ -21,7 +21,8 @@
                 <Insets bottom="17.0" left="22.0" right="22.0" top="17.0" />
             </padding>
             <Label styleClass="app-title" text="GEEK" />
-            <Label styleClass="app-subtitle" text="A calm place for everything on your mind" />
+            <Label styleClass="app-subtitle"
+                   text="CALM MISSION CONTROL · SYSTEMS ONLINE" />
         </VBox>
     </top>
     <center>
