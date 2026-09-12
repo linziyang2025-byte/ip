@@ -28,57 +28,71 @@ public final class Parser {
             throw new GeekException("Please enter a command.");
         }
 
-        if (input.equals("bye")) {
+        String trimmedInput = input.strip();
+
+        if (trimmedInput.equals("bye")) {
             return Command.withType(CommandType.BYE);
         }
 
-        if (input.equals("list")) {
+        if (matchesCommand(trimmedInput, "bye")) {
+            throw new GeekException(
+                    "The bye command does not accept arguments."
+            );
+        }
+
+        if (trimmedInput.equals("list")) {
             return Command.withType(CommandType.LIST);
         }
 
-        if (input.equals("sort")) {
+        if (matchesCommand(trimmedInput, "list")) {
+            throw new GeekException(
+                    "The list command does not accept arguments."
+            );
+        }
+
+        if (trimmedInput.equals("sort")) {
             return Command.withType(CommandType.SORT);
         }
 
-        if (matchesCommand(input, "sort")) {
+        if (matchesCommand(trimmedInput, "sort")) {
             throw new GeekException(
                     "The sort command does not accept arguments."
             );
         }
 
-        if (matchesCommand(input, "find")) {
-            return Command.withKeyword(parseKeyword(input));
+        if (matchesCommand(trimmedInput, "find")) {
+            return Command.withKeyword(parseKeyword(trimmedInput));
         }
 
-        if (matchesCommand(input, "on")) {
-            return Command.withDate(parseQueryDate(input));
+        if (matchesCommand(trimmedInput, "on")) {
+            return Command.withDate(parseQueryDate(trimmedInput));
         }
 
-        if (matchesCommand(input, "mark")) {
+        if (matchesCommand(trimmedInput, "mark")) {
             return Command.withTaskNumber(
                     CommandType.MARK,
-                    parseTaskNumber(input, "mark")
+                    parseTaskNumber(trimmedInput, "mark")
             );
         }
 
-        if (matchesCommand(input, "unmark")) {
+        if (matchesCommand(trimmedInput, "unmark")) {
             return Command.withTaskNumber(
                     CommandType.UNMARK,
-                    parseTaskNumber(input, "unmark")
+                    parseTaskNumber(trimmedInput, "unmark")
             );
         }
 
-        if (matchesCommand(input, "delete")) {
+        if (matchesCommand(trimmedInput, "delete")) {
             return Command.withTaskNumber(
                     CommandType.DELETE,
-                    parseTaskNumber(input, "delete")
+                    parseTaskNumber(trimmedInput, "delete")
             );
         }
 
-        if (matchesCommand(input, "todo")
-                || matchesCommand(input, "deadline")
-                || matchesCommand(input, "event")) {
-            return Command.withTask(parseTask(input));
+        if (matchesCommand(trimmedInput, "todo")
+                || matchesCommand(trimmedInput, "deadline")
+                || matchesCommand(trimmedInput, "event")) {
+            return Command.withTask(parseTask(trimmedInput));
         }
 
         throw new GeekException(
@@ -88,7 +102,7 @@ public final class Parser {
 
     /**
      * Returns whether input contains the given command word, optionally
-     * followed by arguments separated by a space.
+     * followed by arguments separated by whitespace.
      *
      * @param input Complete user input.
      * @param command Command word to match.
@@ -99,7 +113,11 @@ public final class Parser {
             String command
     ) {
         return input.equals(command)
-                || input.startsWith(command + " ");
+                || input.startsWith(command)
+                && input.length() > command.length()
+                && Character.isWhitespace(
+                        input.charAt(command.length())
+                );
     }
 
     /**
@@ -224,13 +242,23 @@ public final class Parser {
      * @throws DateTimeParseException If the deadline has an invalid format.
      */
     private static Task parseDeadline(String input) {
-        int byIndex = input.indexOf("/by");
+        int byIndex = findDelimiter(input, "/by", 0);
 
         if (byIndex == -1) {
             throw new GeekException(
                     "Deadline format: "
                             + "deadline <description> "
                             + "/by <date or date-time>"
+            );
+        }
+
+        if (findDelimiter(
+                input,
+                "/by",
+                byIndex + "/by".length()
+        ) != -1) {
+            throw new GeekException(
+                    "Use /by only once in a deadline command."
             );
         }
 
@@ -268,8 +296,8 @@ public final class Parser {
      *         format.
      */
     private static Task parseEvent(String input) {
-        int fromIndex = input.indexOf("/from");
-        int toIndex = input.indexOf("/to");
+        int fromIndex = findDelimiter(input, "/from", 0);
+        int toIndex = findDelimiter(input, "/to", 0);
 
         if (fromIndex == -1
                 || toIndex == -1
@@ -279,6 +307,20 @@ public final class Parser {
                             + "event <description> "
                             + "/from <date-time> "
                             + "/to <date-time>"
+            );
+        }
+
+        if (findDelimiter(
+                input,
+                "/from",
+                fromIndex + "/from".length()
+        ) != -1 || findDelimiter(
+                input,
+                "/to",
+                toIndex + "/to".length()
+        ) != -1) {
+            throw new GeekException(
+                    "Use /from and /to only once in an event command."
             );
         }
 
@@ -306,6 +348,48 @@ public final class Parser {
         }
 
         return Task.newEvent(description, startTime, endTime);
+    }
+
+    /**
+     * Finds a delimiter that appears as a complete whitespace-separated token.
+     *
+     * This prevents text such as {@code /bypass} from being mistaken for the
+     * {@code /by} deadline delimiter.
+     *
+     * @param input Complete user command.
+     * @param delimiter Delimiter token to find.
+     * @param fromIndex Index at which to begin searching.
+     * @return Index of the next complete delimiter, or {@code -1} if absent.
+     */
+    private static int findDelimiter(
+            String input,
+            String delimiter,
+            int fromIndex
+    ) {
+        int delimiterIndex = input.indexOf(delimiter, fromIndex);
+
+        while (delimiterIndex != -1) {
+            int delimiterEnd = delimiterIndex + delimiter.length();
+            boolean hasStartBoundary = delimiterIndex == 0
+                    || Character.isWhitespace(
+                            input.charAt(delimiterIndex - 1)
+                    );
+            boolean hasEndBoundary = delimiterEnd == input.length()
+                    || Character.isWhitespace(
+                            input.charAt(delimiterEnd)
+                    );
+
+            if (hasStartBoundary && hasEndBoundary) {
+                return delimiterIndex;
+            }
+
+            delimiterIndex = input.indexOf(
+                    delimiter,
+                    delimiterIndex + 1
+            );
+        }
+
+        return -1;
     }
 
     /**

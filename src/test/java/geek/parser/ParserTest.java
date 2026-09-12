@@ -36,6 +36,43 @@ class ParserTest {
     }
 
     @Test
+    void parse_extraWhitespace_acceptsOtherwiseValidCommands() {
+        Command listCommand = Parser.parse("  list\t ");
+        Command markCommand = Parser.parse("\tmark\t3  ");
+
+        assertAll(() -> assertEquals(
+                        CommandType.LIST,
+                        listCommand.type()
+                ), () -> assertEquals(
+                        CommandType.MARK,
+                        markCommand.type()
+                ), () -> assertEquals(
+                        3,
+                        markCommand.taskNumber()
+                )
+        );
+    }
+
+    @Test
+    void parse_simpleCommandsWithArguments_throwSpecificExceptions() {
+        GeekException byeException = assertThrows(
+                GeekException.class, () -> Parser.parse("bye now")
+        );
+        GeekException listException = assertThrows(
+                GeekException.class, () -> Parser.parse("list all")
+        );
+
+        assertAll(() -> assertEquals(
+                        "The bye command does not accept arguments.",
+                        byeException.getMessage()
+                ), () -> assertEquals(
+                        "The list command does not accept arguments.",
+                        listException.getMessage()
+                )
+        );
+    }
+
+    @Test
     void parse_sortWithArguments_throwsGeekException() {
         GeekException exception = assertThrows(
                 GeekException.class, () -> Parser.parse("sort date")
@@ -113,6 +150,33 @@ class ParserTest {
     }
 
     @Test
+    void parse_deadlineWithDuplicateByDelimiter_throwsSpecificException() {
+        GeekException exception = assertThrows(
+                GeekException.class, () -> Parser.parse(
+                        "deadline return book /by 2/12/2019 "
+                                + "/by 3/12/2019"
+                )
+        );
+
+        assertEquals(
+                "Use /by only once in a deadline command.",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    void parse_deadlineWithSimilarText_doesNotMistakeTextForDelimiter() {
+        Command command = Parser.parse(
+                "deadline review /bypass rules /by 2/12/2019"
+        );
+
+        assertEquals(
+                "[D][ ] review /bypass rules (by: Dec 2 2019)",
+                command.task().toString()
+        );
+    }
+
+    @Test
     void parse_eventWithValidRange_returnsAddCommand() {
         Command command = Parser.parse(
                 "event project meeting "
@@ -129,6 +193,22 @@ class ParserTest {
                                 + "to: Dec 2 2019, 8:00 PM)",
                         command.task().toString()
                 )
+        );
+    }
+
+    @Test
+    void parse_eventWithDuplicateDelimiter_throwsSpecificException() {
+        GeekException exception = assertThrows(
+                GeekException.class, () -> Parser.parse(
+                        "event meeting /from 2/12/2019 1800 "
+                                + "/from 2/12/2019 1900 "
+                                + "/to 2/12/2019 2000"
+                )
+        );
+
+        assertEquals(
+                "Use /from and /to only once in an event command.",
+                exception.getMessage()
         );
     }
 
