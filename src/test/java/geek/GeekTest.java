@@ -1,12 +1,20 @@
 package geek;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+
+import geek.task.Task;
 
 /**
  * Tests the shared command-response interface used by the JavaFX UI.
@@ -84,6 +92,131 @@ class GeekTest {
 
         assertAllTasksAreChronological(sortResponse);
         assertAllTasksAreChronological(reloadedList);
+    }
+
+    @Test
+    void getResponse_corruptedSavedTask_warnsOnceAndLoadsValidTasks()
+            throws IOException {
+        Path filePath = tempDirectory.resolve("geek.txt");
+        Task validTask = Task.newTodo("read book");
+        Files.write(
+                filePath,
+                List.of(
+                        validTask.toDataString(),
+                        "not a valid saved task"
+                ),
+                StandardCharsets.UTF_8
+        );
+        Geek geek = new Geek(filePath.toString());
+
+        String firstResponse = geek.getResponse("list");
+        String secondResponse = geek.getResponse("list");
+
+        assertAll(() -> assertTrue(
+                        firstResponse.startsWith(
+                                "Warning: Skipped corrupted "
+                                        + "saved tasks on lines 2."
+                        )
+                ), () -> assertTrue(
+                        firstResponse.contains("[T][ ] read book")
+                ), () -> assertFalse(
+                        secondResponse.contains("Warning:")
+                ), () -> assertTrue(
+                        secondResponse.contains("[T][ ] read book")
+                )
+        );
+    }
+
+    @Test
+    void getResponse_parentPathIsFile_reportsLoadErrorAndContinues()
+            throws IOException {
+        Path blockingParent = tempDirectory.resolve("not-a-folder");
+        Files.writeString(
+                blockingParent,
+                "This file prevents a directory from being created.",
+                StandardCharsets.UTF_8
+        );
+        Geek geek = new Geek(
+                blockingParent.resolve("geek.txt").toString()
+        );
+
+        String response = geek.getResponse("list");
+
+        assertEquals(
+                "OOPS!!! I could not load the saved tasks.\n\n"
+                        + "Your task list is empty.",
+                response
+        );
+    }
+
+    @Test
+    void getResponse_dataFileBecomesDirectory_reportsSaveError()
+            throws IOException {
+        Path filePath = tempDirectory.resolve("geek.txt");
+        Geek geek = new Geek(filePath.toString());
+        geek.getResponse("list");
+        Files.delete(filePath);
+        Files.createDirectory(filePath);
+
+        String addResponse = geek.getResponse("todo read book");
+        String listResponse = geek.getResponse("list");
+
+        assertAll(() -> assertTrue(
+                        addResponse.contains(
+                                "I've added this task"
+                        )
+                ), () -> assertTrue(
+                        addResponse.contains(
+                                "OOPS!!! I could not save the tasks."
+                        )
+                ), () -> assertTrue(
+                        listResponse.contains("[T][ ] read book")
+                )
+        );
+    }
+
+    @Test
+    void getResponse_outOfRangeTaskNumbers_returnFriendlyErrors() {
+        Geek geek = new Geek(
+                tempDirectory.resolve("geek.txt").toString()
+        );
+        String expectedMessage =
+                "OOPS!!! That task number does not exist.";
+
+        String markResponse = geek.getResponse("mark 1");
+        geek.getResponse("todo read book");
+        String unmarkResponse = geek.getResponse("unmark 0");
+        String deleteResponse = geek.getResponse("delete 2");
+
+        assertAll(() -> assertEquals(
+                        expectedMessage,
+                        markResponse
+                ), () -> assertEquals(
+                        expectedMessage,
+                        unmarkResponse
+                ), () -> assertEquals(
+                        expectedMessage,
+                        deleteResponse
+                )
+        );
+    }
+
+    @Test
+    void getResponse_invalidCalendarDate_returnsFormatGuidance() {
+        Geek geek = new Geek(
+                tempDirectory.resolve("geek.txt").toString()
+        );
+
+        String response = geek.getResponse(
+                "deadline submit report /by 30/2/2026"
+        );
+
+        assertEquals(
+                "OOPS!!! Use a supported date or time format, "
+                        + "such as 2019-12-02, 2/12/2019 1800, or "
+                        + "Dec 2 2019 6:00 PM.",
+                response
+        );
     }
 
     private static void assertAllTasksAreChronological(String response) {
