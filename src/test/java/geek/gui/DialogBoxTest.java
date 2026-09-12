@@ -33,7 +33,7 @@ class DialogBoxTest {
     void requiresAttention_normalResponse_returnsFalse() {
         assertFalse(
                 DialogBox.requiresAttention(
-                        "Here are the tasks in your list."
+                        "Here's what's on your mission board."
                 )
         );
     }
